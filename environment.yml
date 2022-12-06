@@ -1,0 +1,19 @@
+name: styleres
+channels:
+  - pytorch
+  - anaconda
+  - defaults
+dependencies:
+  - cudatoolkit=10.1
+  - ninja=1.10
+  - numpy=1.21
+  - pillow=8.4
+  - pip=21.2
+  - python=3.7
+  - pytorch=1.7
+  - scikit-image=0.17
+  - torchvision==0.8.2
+  - pip:
+    - scikit-learn==1.0
+    - scipy==1.7
+    - tqdm==4.62
