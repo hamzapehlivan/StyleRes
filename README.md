@@ -5,8 +5,8 @@
 
 
 <p float="left">
-<img src="assests/teaser.svg" width="450"/>
-<img src="assests/teaser2.svg" width="450"/> 
+<img src="assests/teaser.svg" width="400"/>
+<img src="assests/teaser2.svg" width="400"/> 
 <br>
 
 </p>
