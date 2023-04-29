@@ -4,6 +4,11 @@ from torch.nn import Module
 from torch.nn import functional as F
 import math
 
+"""
+Modified from StyleClip repository
+https://github.com/orpatashnik/StyleCLIP/blob/main/mapper/latent_mappers.py
+""" 
+
 def fused_leaky_relu(input, bias, negative_slope=0.2, scale=2 ** 0.5):
     rest_dim = [1] * (input.ndim - bias.ndim - 1)
     if input.ndim == 3:

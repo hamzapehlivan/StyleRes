@@ -21,8 +21,8 @@ from .torch_utils.ops import upfirdn2d
 from .torch_utils.ops import bias_act
 from .torch_utils.ops import fma
 
+latent_space = "w+"
 #----------------------------------------------------------------------------
-
 
 def normalize_2nd_moment(x, dim=1, eps=1e-8):
     return x * (x.square().mean(dim=dim, keepdim=True) + eps).rsqrt()
@@ -308,11 +308,17 @@ class SynthesisLayer(torch.nn.Module):
             self.noise_strength = torch.nn.Parameter(torch.zeros([]))
         self.bias = torch.nn.Parameter(torch.zeros([out_channels]))
 
-    def forward(self, x, w, noise_mode='random',fused_modconv=True, gain=1):
+    def forward(self, x, w, noise_mode='random',fused_modconv=True, gain=1, return_styles=False):
+        global latent_space
+        if latent_space == "w+":
+            styles = self.affine(w)
+            if return_styles:
+                return styles
+        else:
+            styles = w
         assert noise_mode in ['random', 'const', 'none']
         in_resolution = self.resolution // self.up
         misc.assert_shape(x, [None, self.in_channels, in_resolution, in_resolution])
-        styles = self.affine(w)
 
         noise = None
         if self.use_noise and noise_mode == 'random':
@@ -350,8 +356,13 @@ class ToRGBLayer(torch.nn.Module):
         self.bias = torch.nn.Parameter(torch.zeros([out_channels]))
         self.weight_gain = 1 / np.sqrt(in_channels * (kernel_size ** 2))
 
-    def forward(self, x, w, fused_modconv=True):
-        styles = self.affine(w) * self.weight_gain
+    def forward(self, x, w, fused_modconv=True, return_styles=False):
+        if latent_space == "w+":
+            styles = self.affine(w) * self.weight_gain
+            if return_styles:
+                return styles
+        else:
+            styles = w
         x = modulated_conv2d(x=x, weight=self.weight, styles=styles, demodulate=False, fused_modconv=fused_modconv)
         x = bias_act.bias_act(x, self.bias.to(x.dtype), clamp=self.conv_clamp)
         return x
@@ -524,13 +535,18 @@ class SynthesisBlock(torch.nn.Module):
             self.modify_feature_gates = GateNetwork(in_channels=512, out_channels=512)
         self.embed_res = embed_res
 
-    def forward(self, x, img, ws, highres_outs=None, return_f = False,
+    def forward(self, x, img, ws, highres_outs=None, return_f = False, return_styles=False,
             force_fp32=False, fused_modconv=None, update_emas=False, **layer_kwargs):
+
         _ = update_emas # unused
-        misc.assert_shape(ws, [None, self.num_conv + self.num_torgb, self.w_dim])
-        w_iter = iter(ws.unbind(dim=1))
-        if ws.device.type != 'cuda':
-            force_fp32 = True
+        global latent_space
+        if latent_space == "w+":
+            misc.assert_shape(ws, [None, self.num_conv + self.num_torgb, self.w_dim])
+            w_iter = iter(ws.unbind(dim=1))
+            if ws.device.type != 'cuda':
+                force_fp32 = True
+        else:
+            w_iter = iter(ws)
         dtype = torch.float16 if self.use_fp16 and not force_fp32 else torch.float32
         memory_format = torch.channels_last if self.channels_last and not force_fp32 else torch.contiguous_format
         if fused_modconv is None:
@@ -540,22 +556,27 @@ class SynthesisBlock(torch.nn.Module):
 
         # Input.
         if self.in_channels == 0:
+            batch_size = ws.shape[0] if latent_space == 'w+' else ws[0].shape[0]
             x = self.const.to(dtype=dtype, memory_format=memory_format)
-            x = x.unsqueeze(0).repeat([ws.shape[0], 1, 1, 1])
+            x = x.unsqueeze(0).repeat([batch_size, 1, 1, 1])
         else:
-            misc.assert_shape(x, [None, self.in_channels, self.resolution // 2, self.resolution // 2])
-            x = x.to(dtype=dtype, memory_format=memory_format)
+            if not return_styles:
+                misc.assert_shape(x, [None, self.in_channels, self.resolution // 2, self.resolution // 2])
+                x = x.to(dtype=dtype, memory_format=memory_format)
         gouts = {}
+        style_outs = []
         # Main layers.
         if self.in_channels == 0:
-            x = self.conv1(x, next(w_iter), fused_modconv=fused_modconv,  **layer_kwargs)
+            x = self.conv1(x, next(w_iter), fused_modconv=fused_modconv, return_styles=return_styles,  **layer_kwargs)
+            if return_styles:   style_outs.append(x)
         elif self.architecture == 'resnet':
             y = self.skip(x, gain=np.sqrt(0.5))
             x = self.conv0(x, next(w_iter), fused_modconv=fused_modconv, **layer_kwargs)
             x = self.conv1(x, next(w_iter), fused_modconv=fused_modconv, gain=np.sqrt(0.5), **layer_kwargs)
             x = y.add_(x)
         else:
-            x = self.conv0(x, next(w_iter), fused_modconv=fused_modconv, **layer_kwargs)
+            x = self.conv0(x, next(w_iter), fused_modconv=fused_modconv, return_styles=return_styles, **layer_kwargs)
+            if return_styles:   style_outs.append(x)
             if x.shape[-1] == self.embed_res and return_f:
                     return x, None
             #HighResFeat Generator Modification
@@ -568,14 +589,18 @@ class SynthesisBlock(torch.nn.Module):
                 deltaF, gate = self.modify_feature_gates(x, aligned_feats)
                 x = (x * (1-gate) ) + ( (x + deltaF) * gate )
 
-            x = self.conv1(x, next(w_iter), fused_modconv=fused_modconv, **layer_kwargs)
+            x = self.conv1(x, next(w_iter), fused_modconv=fused_modconv, return_styles=return_styles, **layer_kwargs)
+            if return_styles:   style_outs.append(x)
 
         # ToRGB.
         if img is not None:
             misc.assert_shape(img, [None, self.img_channels, self.resolution // 2, self.resolution // 2])
             img = upfirdn2d.upsample2d(img, self.resample_filter)
         if self.is_last or self.architecture == 'skip':
-            y = self.torgb(x, next(w_iter), fused_modconv=fused_modconv)
+            y = self.torgb(x, next(w_iter), fused_modconv=fused_modconv, return_styles=return_styles)
+            if return_styles:   
+                style_outs.append(y)
+                return style_outs, None
             y = y.to(dtype=torch.float32, memory_format=torch.contiguous_format)
             img = img.add_(y) if img is not None else y
 
@@ -623,26 +648,37 @@ class SynthesisNetwork(torch.nn.Module):
                 self.num_ws += block.num_torgb
             setattr(self, f'b{res}', block)
 
-    def forward(self, ws, highres_outs=None, return_f = False, **block_kwargs):
+    def forward(self, ws, highres_outs=None, return_f = False, return_styles=False, **block_kwargs):
         block_ws = []
+        global latent_space
         with torch.autograd.profiler.record_function('split_ws'):
-            misc.assert_shape(ws, [None, self.num_ws, self.w_dim])
-            ws = ws.to(torch.float32)
+            if latent_space == 'w+':
+                misc.assert_shape(ws, [None, self.num_ws, self.w_dim])
+                ws = ws.to(torch.float32)
             w_idx = 0
+            s_idx = 0
             for res in self.block_resolutions:
                 block = getattr(self, f'b{res}')
-                block_ws.append(ws.narrow(1, w_idx, block.num_conv + block.num_torgb))
+                if latent_space == 'w+':
+                    block_ws.append(ws.narrow(1, w_idx, block.num_conv + block.num_torgb))
+                else:
+                    block_ws.append(ws[s_idx: s_idx + block.num_conv + block.num_torgb])
                 w_idx += block.num_conv
+                s_idx += block.num_conv + block.num_torgb
 
         x = img = None
+        styles = []
         conv_idx = 0
         for res, cur_ws in zip(self.block_resolutions, block_ws):
             block = getattr(self, f'b{res}')
-            x, img = block(x, img, cur_ws, highres_outs, return_f, **block_kwargs)
+            x, img = block(x, img, cur_ws, highres_outs, return_f, return_styles, **block_kwargs)
             if return_f and img is None:
                 return x
+            if return_styles:
+                styles.extend(x)
                 
             conv_idx += block.num_conv
+        if return_styles:   return styles
         return img
 
     def extra_repr(self):
@@ -675,13 +711,20 @@ class Generator(torch.nn.Module):
         self.mapping = MappingNetwork(z_dim=z_dim, c_dim=c_dim, w_dim=w_dim, num_ws=self.num_ws, **mapping_kwargs)
 
    
-    def forward(self, lat, c, truncation_psi=1, truncation_cutoff=None, update_emas=False, mode='synthesis', return_f = False, **synthesis_kwargs):
-        # self.freeze_non_trainable_layers()
+    def forward(self, lat, c, truncation_psi=1, truncation_cutoff=None, update_emas=False, mode='synthesis', return_f = False, 
+           return_styles=False, **synthesis_kwargs):
+
+        global latent_space
+        if type(lat) is list:
+            latent_space = 's'
+        else:
+            latent_space = 'w+'
+
         if mode == 'mapping':
             ws = self.mapping(lat, c, truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff, update_emas=update_emas)
             return ws
         if mode == 'synthesis':
-            img = self.synthesis(lat, highres_outs = c, return_f=return_f, update_emas=False, **synthesis_kwargs)
+            img = self.synthesis(lat, highres_outs = c, return_f=return_f, update_emas=False, return_styles=return_styles, **synthesis_kwargs)
             return img
 
 #----------------------------------------------------------------------------

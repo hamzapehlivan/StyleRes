@@ -38,6 +38,9 @@ class StyleRes(nn.Module):
         image = image.to(self.device)
         with torch.no_grad():
             latents, skips = self.encoder(image)
+            input_is_stylespace = True if cfg.method == 'styleclip' and cfg.type == 'global' else False
+            if input_is_stylespace:
+                latents = self.generator(latents, None, return_styles=True)
 
         # GradCtrl requires gradients, others do not
         latents_edited = self.editor.edit(latents, cfg) 
@@ -46,7 +49,7 @@ class StyleRes(nn.Module):
             # Get F space features F_feats, for the original image
             skips['F_feats'] = self.generator(latents, skips, return_f = True, **self.G_kwargs_val)
             # Transform F_feats to incoming edited image
-            images = self.generator(latents_edited, skips,  **self.G_kwargs_val)
+            images = self.generator(latents_edited, skips, **self.G_kwargs_val)
             
         return images
 

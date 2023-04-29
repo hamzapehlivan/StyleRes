@@ -1,0 +1,18 @@
+Neutral,Target,Strength,Disentanglement
+face with hair,face with curly hair,3,0.2
+face with hair,face with bobcut hair,3,0.11
+face with hair,face with long hair,3,0.15
+face with hair,face with straight hair,3,0.13
+face with hair,face with black hair,2,0.18
+face with hair,face with grey hair,3,0.18
+face with hair,face with fringe hair,2,0.15
+face with hair,face with Hi-top fade hair,2,0.11
+face,face with makeup,3,0.11
+face,face with wrinkle,5,0.14
+face,sad face,3,0.12
+face,female face,3,0.15
+face,tanned face,3,0.13
+face,pale face,2,0.15
+face with eyes,face with blue eyes,3,0.11
+a face,a face with bangs,1,0.11
+a face,a face with glasses,4,0.11
