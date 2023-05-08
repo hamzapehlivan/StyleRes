@@ -1,5 +1,8 @@
 import torch
-import clip
+try:
+    import clip
+except:
+    print("CLIP model is not available. Global directions method can't be used")
 import copy
 from options import Settings
 
