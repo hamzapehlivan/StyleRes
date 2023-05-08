@@ -1,8 +1,7 @@
 # StyleRes: Transforming the Residuals for Real Image Editing with StyleGAN (CVPR 2023)
 
 <!-- [supp.]() -->
-[Arxiv](https://arxiv.org/abs/2212.14359) | [Website](https://www.cs.bilkent.edu.tr/~adundar/projects/StyleRes/) | [Demo](https://huggingface.co/spaces/hamzapehlivan/StyleRes) <!--| [Colab]() | [Demo]() | [Supp.]()-->
-
+[Arxiv](https://arxiv.org/abs/2212.14359) | [Website](https://www.cs.bilkent.edu.tr/~adundar/projects/StyleRes/) | [Demo](https://huggingface.co/spaces/hamzapehlivan/StyleRes) | [Colab](https://colab.research.google.com/github/hamzapehlivan/StyleRes/blob/master/colab_inference.ipynb) 
 
 <p float="left">
 <img src="assests/teaser.svg" width="400"/>
@@ -18,7 +17,7 @@ Our inversion model adopts high-rate feature maps for incoming edits, so the qua
 ## To Do List
 - [x] Release the inference code and demo. 
 - [x] Add StyleClip's global directions
-- [ ] Release Colab notebook.
+- [x] Release Colab notebook.
 - [ ] Add GradCtrl edits
 - [ ] Release the evaluation code. 
 
