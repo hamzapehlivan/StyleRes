@@ -88,7 +88,7 @@ This work is available under [NVIDIA Source Code License](LICENSE).
 This means that our work can solely be used for non-commercial purposes.
 
 ## Related Works
-This work builds upon a GAN inversion framework [e4e](https://github.com/omertov/encoder4editing) in order to invert images into the latent and feature spaces of [StlyeGAN2](https://github.com/NVlabs/stylegan3).
+This work builds upon a GAN inversion framework [e4e](https://github.com/omertov/encoder4editing) in order to invert images into the latent and feature spaces of [StyleGAN2](https://github.com/NVlabs/stylegan3).
 
 We got inspired from various inversion works, and used the source code of some of them. The main ones are [HFGI](https://github.com/Tengfei-Wang/HFGI), [Hyperstyle](https://github.com/yuval-alaluf/hyperstyle) and [IDInvert](https://github.com/genforce/genforce).    
 
