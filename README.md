@@ -20,6 +20,7 @@ Our inversion model adopts high-rate feature maps for incoming edits, so the qua
 - [x] Release Colab notebook.
 - [ ] Add GradCtrl edits
 - [ ] Release the evaluation code. 
+- [ ] Release the training code. 
 
 ## Prerequisites
 - Linux
