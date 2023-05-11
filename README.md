@@ -18,16 +18,18 @@ Our inversion model adopts high-rate feature maps for incoming edits, so the qua
 - [x] Release the inference code and demo. 
 - [x] Add StyleClip's global directions
 - [x] Release Colab notebook.
-- [ ] Add GradCtrl edits
+- [x] Add GradCtrl edits
 - [ ] Release the evaluation code. 
 
 ## Prerequisites
 - Linux
     - Tested on Ubuntu 18.04. 
 - Can be run on CPU or Nvidia GPU.
-    - At least for 4GB GPU memory required for the GPU execution. 
+    - At least for 4GB GPU memory required for the GPU execution.
+    - StyleGAN uses system wide installation of CUDA to compile custom C++ codes. We have tested the code with CUDA 10.1 and upwards. 
 - [Anaconda](https://www.anaconda.com/) is recommended to install the dependencies. 
 ## Installation
+- Install CUDA library (10.1 or upwards). One can follow NVIDIA Developer [website](https://developer.nvidia.com/cuda-downloads?target_os=Linux). Make sure that CUDA_HOME environment variable is set, as indicated in the post installation steps. 
 - Clone this repository:
 ```
 git clone https://github.com/hamzapehlivan/StyleRes.git
@@ -65,6 +67,7 @@ This repository currently supports:
 ```
 pip install git+https://github.com/openai/CLIP.git
 ```
+- Smile, age, eyeglasses and gender edits with GradCtrl. 
 
 To edit images in the `inference_samples` directory, run the inference code as:
 ```

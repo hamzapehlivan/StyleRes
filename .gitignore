@@ -17,6 +17,5 @@ __pycache__/
 *.tar
 *.zip
 events.*
-*.pkl
 *.h5
 *.dat

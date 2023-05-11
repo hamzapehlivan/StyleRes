@@ -1,7 +1,10 @@
 import numpy as np
 import torch
 from PIL import Image
-import dlib
+try: 
+    import dlib
+except:
+    print("dlib library is not installed, image alignment cannot be used.")
 import numpy as np
 import PIL
 import PIL.Image

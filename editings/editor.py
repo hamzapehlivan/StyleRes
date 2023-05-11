@@ -1,6 +1,7 @@
 from .interfacegan import InterFaceGAN
 from .ganspace import GanSpace
 from .styleclip import StyleClip
+from .gradctrl import GradCtrl
 from options import Settings
 
 """
@@ -11,6 +12,7 @@ class Editor():
         self.interfacegan_editor = InterFaceGAN()
         self.ganspace_editor = GanSpace()
         self.styleclip_editor = StyleClip()
+        self.gradctrl_editor = GradCtrl()
 
     def edit(self, latent, cfg):
         # Finds the corresponding function using method name
