@@ -10,7 +10,6 @@ __pycache__/
 *.gif
 *.avi
 *.mp4
-*.npy
 *.json
 *.log
 *.html
