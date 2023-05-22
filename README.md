@@ -98,3 +98,16 @@ We got inspired from various inversion works, and used the source code of some o
 
 In our work, we show that GAN inversion models should be designed with editings in mind. Although we did not use any of the editing methods while training, we showcase that a wide range edits found by [Interfacegan](https://github.com/genforce/interfacegan), [GANSpace](https://github.com/harskish/ganspace), [StyleClip](https://github.com/orpatashnik/StyleCLIP) and [GradCtrl](https://github.com/zikuncshelly/GradCtrl) are still applicable. 
 
+
+# Citation
+You can cite our work using the following:
+```
+@InProceedings{Pehlivan_2023_CVPR,
+    author    = {Pehlivan, Hamza and Dalva, Yusuf and Dundar, Aysegul},
+    title     = {StyleRes: Transforming the Residuals for Real Image Editing With StyleGAN},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    month     = {June},
+    year      = {2023},
+    pages     = {1828-1837}
+}
+```
