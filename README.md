@@ -1,7 +1,7 @@
 # StyleRes: Transforming the Residuals for Real Image Editing with StyleGAN (CVPR 2023)
 
 <!-- [supp.]() -->
-[Arxiv](https://arxiv.org/abs/2212.14359) | [Website](https://www.cs.bilkent.edu.tr/~adundar/projects/StyleRes/) | [Demo](https://huggingface.co/spaces/hamzapehlivan/StyleRes) | [Colab](https://colab.research.google.com/github/hamzapehlivan/StyleRes/blob/master/colab_inference.ipynb) 
+[Paper (CVPR)](https://openaccess.thecvf.com/content/CVPR2023/papers/Pehlivan_StyleRes_Transforming_the_Residuals_for_Real_Image_Editing_With_StyleGAN_CVPR_2023_paper.pdf) | [Paper (Arxiv)](https://arxiv.org/abs/2212.14359) | [Website](https://www.cs.bilkent.edu.tr/~adundar/projects/StyleRes/) | [Demo](https://huggingface.co/spaces/hamzapehlivan/StyleRes) | [Colab](https://colab.research.google.com/github/hamzapehlivan/StyleRes/blob/master/colab_inference.ipynb) | [Video](https://www.youtube.com/watch?v=S9ZswKv8enw) | [Supp.](https://openaccess.thecvf.com/content/CVPR2023/supplemental/Pehlivan_StyleRes_Transforming_the_CVPR_2023_supplemental.pdf)
 
 <p float="left">
 <img src="assests/teaser.svg" width="400"/>
