@@ -17,3 +17,4 @@ dependencies:
     - scikit-learn==1.0
     - scipy==1.7
     - tqdm==4.62
+    - opencv-python==4.8

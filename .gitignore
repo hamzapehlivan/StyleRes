@@ -18,3 +18,4 @@ __pycache__/
 events.*
 *.h5
 *.dat
+*.npy

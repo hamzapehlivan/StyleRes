@@ -19,7 +19,7 @@ Our inversion model adopts high-rate feature maps for incoming edits, so the qua
 - [x] Add StyleClip's global directions
 - [x] Release Colab notebook.
 - [x] Add GradCtrl edits
-- [ ] Release the evaluation code. 
+- [x] Release the evaluation code. 
 - [ ] Release the training code. 
 
 ## Prerequisites
@@ -86,6 +86,24 @@ apt install cmake
 pip install dlib scipy
 ```
 With `--aligner_path` argument, specify the path of the downloaded landmark detector model. 
+
+## Metrics
+We used [CelebAHQ dataset](https://github.com/switchablenorms/CelebAMask-HQ) in our paper. To extract smiling and non-smiling test images, run:
+```
+python dataset_tools.py --attribute Smiling 1 --set test
+python dataset_tools.py --attribute Smiling -1 --set test
+```
+To extract only the test set (used in age and pose edit evaluations):
+```
+python dataset_tools.py --set test
+```
+
+- **FID:** We used FID implementation given in [StarGANv2](https://github.com/clovaai/stargan-v2) repository. Note that FID is very sensitive to the image formats (PNG, JPG..) and resizing methods. When calculating FID on CelebAHQ dataset, we downsampled the output images with bicubic interpolation (Resampling.BICUBIC of PIL library) and saved them in JPG format. Example usage is given in [fid.sh](fid.sh).
+
+- **ID:** Identity metric can be used to measure identity differences after a certain edit. The implementation is borrowed from [Hyperstyle](https://github.com/yuval-alaluf/hyperstyle). This metric requires CurricularFace Backbone ([dowload link](https://drive.google.com/file/d/1f4IwVa2-Bn9vWLwB-bUwm53U_MlvinAj/view)) and MTCNN ([dowload link](https://drive.google.com/file/d/1tJ7ih-wbCO6zc3JhI_1ZGjmwXKKaPlja/view)) models. By default, these models should be put in the 'checkpoints' directory. The default paths can be changed from the [config file](evaluation/id/configs/paths_config.py). Example usage is given in [id.sh](id.sh). 
+
+- **SSIM-LPIPS**: These metrics are borrowed from [e4e](https://github.com/omertov/encoder4editing) repository. Example usage is given in [recon_metrics.sh](recon_metrics.sh)
+
 
 ## License 
 This work is available under [NVIDIA Source Code License](LICENSE). 
